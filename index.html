@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Earth Juckbox Gallery</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <main class="gallery">
+        <div class="lamp lamp-one">
+            <span class="cord"></span>
+            <span class="shade"></span>
+            <span class="bulb"></span>
+        </div>
+        <div class="lamp lamp-three">
+            <span class="cord"></span>
+            <span class="shade"></span>
+            <span class="bulb"></span>
+        </div>
+        <header class="intro">
+            <h1>Earth Rhythm</h1>
+            <span>Listen to every detail</span>
+        </header>
+        <section class="frame frame-left">
+            <button class="image"
+                data-image="images/sea.jfif"
+                data-audio="/sounds/sonification_sea_temp.mp3">
+                <img src="images/sea.jfif" alt="Global Sea Surface Currents and Temperature">
+            </button>
+        </section>
+        <section class="frame oval-frame frame-center">
+            <button class="image"
+                data-image="/images/photo_6039650447376716277_x.jpg"
+                data-audio="/sounds/10b87b7c-f567-4da2-9169-66a084611a72.mp3">
+                <img src="/images/photo_6039650447376716277_x.jpg" alt="SOS - Change in Night Lights between 2012 and 2023">
+            </button>
+        </section>
+        <section class="frame oval-frame frame-small">
+            <button class="image"
+                data-image="/images/co2 emission.jpg"
+                data-audio="/sounds/Carbon.mp3">
+                <img src="/images/co2 emission.jpg" alt="ODIAC: a map of human made carbon dioxide emissions">
+            </button>
+        </section>
+        <section class="frame frame-right">
+            <button class="image"
+                data-image="/images/wild fires.png"
+                data-audio="/sounds/fires_piano.mp3">
+                <img src="/images/wild fires.png" alt="NASA FIRMS Global Active Fire">
+            </button>
+        </section>
+
+    </main>
+    <dialog id="lightbox">
+    <div class="lightbox-content">
+
+        <button id="closeLightbox">x</button>
+
+        <h2 id="lightboxTitle">Image Title</h2>
+
+        <div class="scan-container">
+    <img id="lightboxImage" src="" alt="Earth visualization">
+    <canvas id="visualizer"></canvas>
+</div>
+
+<audio id="sonificationAudio"></audio>
+
+<button id="playSonification">
+    ▶ Play Sonification
+</button>
+
+    </div>
+</dialog>
+    <script src="script.js"></script>
+</body>
+
+</html>
