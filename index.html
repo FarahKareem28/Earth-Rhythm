@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Earth Juckbox Gallery</title>
+    <title>Earth Jukebox Gallery</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -26,30 +26,36 @@
         </header>
         <section class="frame frame-left">
             <button class="image"
+                aria-label="Open Global Sea Surface Currents and Temperature sonification"
                 data-image="images/sea.jfif"
-                data-audio="/sounds/sonification_sea_temp.mp3">
+                data-audio="sounds/sonification_sea_temp.mp3">
                 <img src="images/sea.jfif" alt="Global Sea Surface Currents and Temperature">
             </button>
         </section>
         <section class="frame oval-frame frame-center">
             <button class="image"
-                data-image="/images/photo_6039650447376716277_x.jpg"
-                data-audio="/sounds/10b87b7c-f567-4da2-9169-66a084611a72.mp3">
-                <img src="/images/photo_6039650447376716277_x.jpg" alt="SOS - Change in Night Lights between 2012 and 2023">
+                aria-label="Open Change in Night Lights sonification"
+                data-full="images/nightlights.png"
+                data-image="images/photo_6039650447376716277_x.jpg"
+                data-audio="sounds/10b87b7c-f567-4da2-9169-66a084611a72.mp3">
+                <img src="images/photo_6039650447376716277_x.jpg" alt="SOS - Change in Night Lights between 2012 and 2023">
             </button>
         </section>
         <section class="frame oval-frame frame-small">
             <button class="image"
-                data-image="/images/co2 emission.jpg"
-                data-audio="/sounds/Carbon.mp3">
-                <img src="/images/co2 emission.jpg" alt="ODIAC: a map of human made carbon dioxide emissions">
+                aria-label="Open Human-made Carbon Dioxide Emissions sonification"
+                data-full="images/photo_6039406553363846594_y.jpg"
+                data-image="images/co2 emission.jpg"
+                data-audio="sounds/Carbon.mp3">
+                <img src="images/co2 emission.jpg" alt="ODIAC: a map of human made carbon dioxide emissions">
             </button>
         </section>
         <section class="frame frame-right">
             <button class="image"
-                data-image="/images/wild fires.png"
-                data-audio="/sounds/fires_piano.mp3">
-                <img src="/images/wild fires.png" alt="NASA FIRMS Global Active Fire">
+                aria-label="Open Global Active Fires sonification"
+                data-image="images/wild fires.png"
+                data-audio="sounds/fires_piano.mp3">
+                <img src="images/wild fires.png" alt="NASA FIRMS Global Active Fire">
             </button>
         </section>
 
@@ -57,7 +63,7 @@
     <dialog id="lightbox">
     <div class="lightbox-content">
 
-        <button id="closeLightbox">x</button>
+        <button id="closeLightbox" aria-label="Close">×</button>
 
         <h2 id="lightboxTitle">Image Title</h2>
 
@@ -66,7 +72,7 @@
     <canvas id="visualizer"></canvas>
 </div>
 
-<audio id="sonificationAudio"></audio>
+<audio id="sonificationAudio" preload="none"></audio>
 
 <button id="playSonification">
     ▶ Play Sonification
