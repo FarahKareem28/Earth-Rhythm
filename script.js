@@ -6,13 +6,6 @@ const lightboxTitle = document.querySelector("#lightboxTitle");
 const audio = document.querySelector("#sonificationAudio");
 const playButton = document.querySelector("#playSonification");
 
-const PLAY_LABEL = "▶ Play Sonification";
-const PAUSE_LABEL = "⏸ Pause Sonification";
-
-function setPlayLabel(isPlaying) {
-    playButton.textContent = isPlaying ? PAUSE_LABEL : PLAY_LABEL;
-}
-
 document.querySelectorAll(".image").forEach((image) => {
 
     image.addEventListener("click", () => {
@@ -20,31 +13,25 @@ document.querySelectorAll(".image").forEach((image) => {
         const img = image.querySelector("img");
 
         if (!img || !lightbox || !lightboxImage) return;
-let imageSrc = image.dataset.full || image.dataset.image || img.src;
 
-if (imageSrc.includes("photo")) {
-    imageSrc = "images/nightlights.png";
-} else if (imageSrc.includes("co2")) {
-    imageSrc = "images/photo_6039406553363846594_y.jpg";
-}
+        let imageSrc = image.dataset.image || img.src;
 
-lightboxImage.src = imageSrc;
+        if (img.src.includes("co2")) {
+            imageSrc = "images/photo_6039406553363846594_y.jpg";
+        } else if (img.src.includes("photo")) {
+            imageSrc = "images/nightlights.png";
+        }
+
+        lightboxImage.src = imageSrc;
+
         if (lightboxTitle) {
             lightboxTitle.textContent = img.alt || "Earth Visualization";
         }
 
-        setPlayLabel(false);
-
         if (audio) {
             audio.pause();
             audio.currentTime = 0;
-
-            if (image.dataset.audio) {
-                audio.src = image.dataset.audio;
-            } else {
-                audio.removeAttribute("src");
-            }
-
+            audio.src = image.dataset.audio || "";
             audio.load();
         }
 
@@ -59,9 +46,8 @@ lightboxImage.src = imageSrc;
 
 function closeLightbox() {
     lightbox.close();
+    stopVisualization();
 }
-
-lightbox.addEventListener("close", stopVisualization);
 
 closeButton.addEventListener("click", closeLightbox);
 
@@ -108,6 +94,7 @@ function visualize() {
     const bufferLength = analyser.frequencyBinCount;
     const audioData = new Uint8Array(bufferLength);
 
+    // نجهّز نسخة صغيرة من الصورة لتحليل الإضاءة والتفاصيل بسرعة.
     const imageCanvas = document.createElement("canvas");
     const imageCtx = imageCanvas.getContext("2d", { willReadFrequently: true });
     const sampleWidth = Math.max(2, Math.round(width));
@@ -128,6 +115,7 @@ function visualize() {
                 0, 0, sampleWidth, sampleHeight
             ).data;
         } catch (error) {
+            // لو الصورة من مصدر يمنع قراءة pixels، نكمل بتأثير الصوت فقط.
             console.warn("Could not analyze image pixels:", error);
             imagePixels = null;
         }
@@ -146,18 +134,14 @@ function visualize() {
         const g = imagePixels[index + 1];
         const b = imagePixels[index + 2];
 
+        // إدراك الإضاءة بطريقة أقرب للعين.
         return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     }
 
-    function averageRange(data, start, end) {
-        const to = Math.min(end, data.length);
-        if (to <= start) return 0;
-
-        let sum = 0;
-        for (let i = start; i < to; i++) {
-            sum += data[i];
-        }
-        return sum / (to - start);
+    function average(values) {
+        return values.length
+            ? values.reduce((sum, value) => sum + value, 0) / values.length
+            : 0;
     }
 
     function draw() {
@@ -174,11 +158,12 @@ function visualize() {
         const progress = Math.min(1, audio.currentTime / duration);
         const scanX = progress * width;
 
-        const bassLevel = averageRange(audioData, 0, 10) / 255;
-        const midLevel = averageRange(audioData, 10, 35) / 255;
-        const highLevel = averageRange(audioData, 35, bufferLength) / 255;
+        const bassLevel = average(Array.from(audioData.slice(0, 10))) / 255;
+        const midLevel = average(Array.from(audioData.slice(10, 35))) / 255;
+        const highLevel = average(Array.from(audioData.slice(35))) / 255;
         const audioStrength = bassLevel * 0.25 + midLevel * 0.45 + highLevel * 0.30;
 
+        // نحدّث قراءة الصورة عند كل إطار حتى يظل المسح مرتبطًا بمكان الخط.
         if (!imagePixels && lightboxImage.complete) readImagePixels();
 
         const points = [];
@@ -188,12 +173,14 @@ function visualize() {
         for (let y = 0; y <= height; y += step) {
             const imageX = Math.max(1, Math.min(sampleWidth - 2, scanX));
 
+            // قراءة الإضاءة حول موضع المسح الحالي في الصورة.
             const centerLight = getLuminance(imageX, y);
             const leftLight = getLuminance(imageX - 3, y);
             const rightLight = getLuminance(imageX + 3, y);
             const upperLight = getLuminance(imageX, y - 3);
             const lowerLight = getLuminance(imageX, y + 3);
 
+            // التباين المحلي يكشف حدود الأجسام والتفاصيل، وليس الإضاءة وحدها.
             const horizontalEdge = rightLight - leftLight;
             const verticalEdge = lowerLight - upperLight;
             const edgeStrength = Math.min(
@@ -202,12 +189,14 @@ function visualize() {
                 Math.abs(verticalEdge) * 1.4
             );
 
+            // المناطق المضيئة والداكنة تؤثر في اتجاه ومقدار الانحناء.
             const brightnessOffset = (centerLight - 0.5) * 2;
             const imageInfluence =
                 brightnessOffset * 0.55 +
                 horizontalEdge * 2.0 +
                 verticalEdge * 1.25;
 
+            // الصوت يضيف حركة صغيرة فوق شكل الصورة بدل ما يفرض موجة مستقلة.
             const frequencyIndex = Math.min(
                 bufferLength - 1,
                 Math.floor((y / height) * bufferLength)
@@ -234,6 +223,7 @@ function visualize() {
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
 
+        // منحنيات ناعمة بين نقاط التحليل حتى يتبع الخط شكل الصورة بسلاسة.
         for (let i = 1; i < points.length - 1; i++) {
             const current = points[i];
             const next = points[i + 1];
@@ -256,6 +246,7 @@ function visualize() {
         ctx.stroke();
         ctx.shadowBlur = 0;
 
+        // ومضات خفيفة عند حدود التفاصيل الواضحة في الصورة.
         points.forEach((point, index) => {
             if (index % 5 !== 0 || point.edgeStrength < 0.38) return;
 
@@ -271,7 +262,7 @@ function visualize() {
 
 playButton.addEventListener("click", async () => {
 
-    if (!audio.getAttribute("src")) return;
+    if (!audio.src) return;
 
     setupAudio();
 
@@ -306,38 +297,12 @@ function stopVisualization() {
     cancelAnimationFrame(animationId);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    setPlayLabel(false);
 }
-
-audio.addEventListener("play", () => setPlayLabel(true));
-
-audio.addEventListener("pause", () => setPlayLabel(false));
 
 audio.addEventListener("ended", () => {
 
     cancelAnimationFrame(animationId);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    setPlayLabel(false);
-
-});
-
-audio.addEventListener("error", () => {
-
-    if (!audio.getAttribute("src")) return;
-
-    playButton.textContent = "Audio unavailable";
-    playButton.disabled = true;
-
-});
-
-window.addEventListener("resize", () => {
-
-    if (!analyser || audio.paused || audio.ended) return;
-
-    cancelAnimationFrame(animationId);
-    visualize();
 
 });
