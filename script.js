@@ -23,9 +23,9 @@ document.querySelectorAll(".image").forEach((image) => {
 let imageSrc = image.dataset.full || image.dataset.image || img.src;
 
 if (imageSrc.includes("photo")) {
-    imageSrc = "/images/nightlights.png";
+    imageSrc = "images/nightlights.png";
 } else if (imageSrc.includes("co2")) {
-    imageSrc = "/images/photo_6039406553363846594_y.jpg";
+    imageSrc = "images/photo_6039406553363846594_y.jpg";
 }
 
 lightboxImage.src = imageSrc;
